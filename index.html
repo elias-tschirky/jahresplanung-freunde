@@ -234,14 +234,36 @@
       .dayCell{ min-height:92px; padding:9px; border-radius:14px; }
       .chip{ font-size:11px; padding:5px 9px; }
     }
+
+    /* Notify dock */
+    #notifyDock{
+      position: fixed;
+      left: 18px;
+      top: 170px;
+      width: 320px;
+      max-height: calc(100vh - 220px);
+      overflow: auto;
+      z-index: 20;
+      display: grid;
+      gap: 10px;
+    }
+    @media (max-width: 1100px){
+      #notifyDock{ left: 12px; width: 300px; }
+    }
+    @media (max-width: 900px){
+      #notifyDock{ display:none; }
+    }
   </style>
 </head>
 
 <body>
+  <!-- Notifications (new events since last visit) -->
+  <div id="notifyDock"></div>
+
   <main class="grid">
     <header>
       <h1>Jahresplanung</h1>
-      <div class="sub">Kalender auf Home. Klick auf einen Tag öffnet Details. Auf “Neuer Termin” legst du Events an. Unter “Mitglieder” verwaltest du Namen für Zusagen.</div>
+      <div class="sub">Home zeigt den Monatskalender. Klick auf einen Tag öffnet Details. Neue Termine seit deinem letzten Besuch erscheinen links als Hinweis – einmal zusagen/absagen, dann verschwinden sie.</div>
 
       <div class="row" style="padding-top:10px; justify-content:space-between;">
         <div class="row">
@@ -403,7 +425,7 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwbXF0cXNwaXNkbGdzbmtwYWFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMDk3NjIsImV4cCI6MjA4MTU4NTc2Mn0.FwGThG6nyM8K8GhcCmtWhoYbqqXJGkBoc8rOHG-6k00";
 
     const AUTH_URL = `${SUPABASE_URL}/auth/v1`;
-    const LS_KEY = "sb_session_calendar_v1";
+    const LS_KEY = "sb_session_calendar_v2";
     let session = null;
 
     function saveSession(s){ session = s; localStorage.setItem(LS_KEY, JSON.stringify(s)); }
@@ -460,6 +482,8 @@
     const modalTitle = document.getElementById("modalTitle");
     const modalBody = document.getElementById("modalBody");
     const closeModalBtn = document.getElementById("closeModalBtn");
+
+    const notifyDock = document.getElementById("notifyDock");
 
     function setAuthed(isAuthed, email=""){
       loginSection.classList.toggle("hidden", isAuthed);
@@ -619,7 +643,113 @@
       }
     });
 
-    // Calendar helpers
+    // ===== Notifications for new events =====
+    const SEEN_KEY = "seen_events_after_v1"; // ISO timestamp
+    const WHO_KEY = "my_member_name_v1";     // your name for quick RSVP
+
+    function getSeenTs(){ return localStorage.getItem(SEEN_KEY) || "1970-01-01T00:00:00.000Z"; }
+    function setSeenTsNow(){ localStorage.setItem(SEEN_KEY, new Date().toISOString()); }
+    function getMyName(){ return localStorage.getItem(WHO_KEY) || ""; }
+    function setMyName(n){ localStorage.setItem(WHO_KEY, n); }
+
+    async function ensureMyName(){
+      let n = getMyName();
+      if(n) return n;
+
+      if(!members.length) await loadMembers();
+      const hint = members.length ? members.map(m => m.name).join(", ") : "";
+      n = prompt("Welcher Name bist du? (für Zusagen)\n" + (hint ? "Mitglieder: " + hint : "")) || "";
+      n = n.trim();
+      if(!n) return "";
+      setMyName(n);
+      return n;
+    }
+
+    function renderNotifyCard(ev){
+      const title = ev.title || "Termin";
+      const range = ev.end_date && ev.end_date !== ev.date ? `${ev.date} – ${ev.end_date}` : ev.date;
+      const org = ev.organizer ? ` · ${ev.organizer}` : "";
+      const budget = ev.budget != null ? ` · Budget: ${ev.budget}` : "";
+
+      return `
+        <div class="box" style="padding:12px; border-radius:16px;">
+          <div style="font-weight:900;">Neuer Termin</div>
+          <div style="margin-top:6px; font-weight:900;">${escapeHtml(title)}</div>
+          <div class="muted" style="margin-top:6px; font-size:13px;">${escapeHtml(range)}${escapeHtml(org)}${escapeHtml(budget)}</div>
+          ${ev.description ? `<div class="muted" style="margin-top:8px; font-size:13px; line-height:1.45;">${escapeHtml(ev.description)}</div>` : ""}
+          <div class="row" style="margin-top:10px; gap:8px;">
+            <button class="secondary" data-nrsvp="yes" data-evid="${escapeHtml(ev.id)}">Dabei</button>
+            <button class="secondary" data-nrsvp="maybe" data-evid="${escapeHtml(ev.id)}">Vielleicht</button>
+            <button class="secondary" data-nrsvp="no" data-evid="${escapeHtml(ev.id)}">Nein</button>
+            <button class="secondary" data-open="${escapeHtml(ev.id)}">Details</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function showNewEventsDock(){
+      // only desktop
+      if (window.matchMedia("(max-width: 900px)").matches) {
+        notifyDock.innerHTML = "";
+        return;
+      }
+
+      const seenAfter = getSeenTs();
+
+      // NOTE: requires created_at column (Supabase default)
+      const newEvents = await sbSelect("events", {
+        select: "*",
+        order: "created_at.asc",
+        created_at: "gt." + seenAfter
+      });
+
+      if(!newEvents.length){
+        notifyDock.innerHTML = "";
+        return;
+      }
+
+      notifyDock.innerHTML = newEvents.map(renderNotifyCard).join("");
+
+      // wire buttons
+      notifyDock.querySelectorAll("[data-open]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-open");
+          const ev = allEvents.find(e => e.id === id) || newEvents.find(e => e.id === id);
+          if(ev) await openEventOverlay(ev);
+        });
+      });
+
+      notifyDock.querySelectorAll("[data-nrsvp]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const status = btn.getAttribute("data-nrsvp");
+          const eventId = btn.getAttribute("data-evid");
+          if(!status || !eventId) return;
+
+          const myName = await ensureMyName();
+          if(!myName) return alert("Ohne Name kann ich dich nicht eintragen.");
+
+          try{
+            await sbUpsert("rsvps", [{
+              event_id: eventId,
+              member_name: myName,
+              status,
+              updated_at: new Date().toISOString()
+            }], "event_id,member_name");
+
+            btn.closest(".box")?.remove();
+
+            if(!notifyDock.querySelector(".box")){
+              notifyDock.innerHTML = "";
+              setSeenTsNow();
+            }
+          }catch(e){
+            alert(e.message);
+          }
+        });
+      });
+    }
+
+    // ===== Calendar helpers =====
     let view = new Date(); view.setDate(1);
     const monthNames = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
 
@@ -711,14 +841,14 @@
 
       calendarGrid.innerHTML = cells.join("");
 
-      // click + double click
+      const handler = async (cell) => {
+        const dateStr = cell.getAttribute("data-date");
+        if(dateStr) await openDayOverlay(dateStr);
+      };
+
       calendarGrid.querySelectorAll(".dayCell").forEach(cell => {
-        const handler = async () => {
-          const dateStr = cell.getAttribute("data-date");
-          if(dateStr) await openDayOverlay(dateStr);
-        };
-        cell.addEventListener("click", handler);
-        cell.addEventListener("dblclick", handler);
+        cell.addEventListener("click", () => handler(cell));
+        cell.addEventListener("dblclick", () => handler(cell));
       });
     }
 
@@ -766,8 +896,77 @@
       });
     }
 
+    // ===== ICS (Add to calendar) =====
+    function pad2(n){ return String(n).padStart(2,"0"); }
+    function icsDateUTC(yyyyMmDd){
+      // all-day event, end date in ICS is exclusive. We'll handle that outside.
+      // format: YYYYMMDD
+      return yyyyMmDd.replaceAll("-", "");
+    }
+    function icsEscape(text){
+      return (text || "")
+        .replaceAll("\\", "\\\\")
+        .replaceAll("\n", "\\n")
+        .replaceAll(",", "\\,")
+        .replaceAll(";", "\\;");
+    }
+
+    function downloadIcsForEvent(ev){
+      const title = ev.title || "Termin";
+      const start = ev.date; // YYYY-MM-DD
+      const endInclusive = ev.end_date || ev.date;
+
+      // ICS all-day end is exclusive -> +1 day
+      const endExclusive = isoDate(addDays(new Date(endInclusive + "T00:00:00"), 1));
+
+      const dtStart = icsDateUTC(start);
+      const dtEnd = icsDateUTC(endExclusive);
+
+      const descParts = [];
+      if (ev.organizer) descParts.push(`Organisiert von: ${ev.organizer}`);
+      if (ev.budget != null) descParts.push(`Budget: ${ev.budget}`);
+      if (ev.description) descParts.push(ev.description);
+      const description = descParts.join("\n");
+
+      const uid = `${ev.id}@jahresplanung`;
+      const now = new Date();
+      const dtStamp =
+        now.getUTCFullYear() +
+        pad2(now.getUTCMonth()+1) +
+        pad2(now.getUTCDate()) + "T" +
+        pad2(now.getUTCHours()) +
+        pad2(now.getUTCMinutes()) +
+        pad2(now.getUTCSeconds()) + "Z";
+
+      const ics =
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Jahresplanung//DE
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:${icsEscape(uid)}
+DTSTAMP:${dtStamp}
+SUMMARY:${icsEscape(title)}
+DTSTART;VALUE=DATE:${dtStart}
+DTEND;VALUE=DATE:${dtEnd}
+DESCRIPTION:${icsEscape(description)}
+END:VEVENT
+END:VCALENDAR`;
+
+      const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const safeName = title.replace(/[^a-z0-9\-_]+/gi, "_").slice(0, 40) || "termin";
+      a.download = `${safeName}.ics`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
     async function openEventOverlay(ev){
-      // Members for RSVP
       if(!members.length) await loadMembers();
 
       const rsvps = await loadRsvps(ev.id);
@@ -782,13 +981,16 @@
           ${ev.organizer ? " · organisiert von " + escapeHtml(ev.organizer) : ""}
           ${ev.budget != null ? " · Budget: " + escapeHtml(ev.budget) : ""}
         </div>
-        ${ev.description ? `<div style="margin-bottom:14px; line-height:1.5;">${escapeHtml(ev.description)}</div>`
-                        : `<div class="muted" style="margin-bottom:14px;">Keine Beschreibung.</div>`}
-        <div class="row" style="margin-bottom:10px;">
+
+        <div class="row" style="margin-bottom:12px; gap:8px;">
+          <button class="secondary" id="icsBtn">In Kalender</button>
           <span class="pill">Dabei: ${counts.yes}</span>
           <span class="pill">Vielleicht: ${counts.maybe}</span>
           <span class="pill">Nein: ${counts.no}</span>
         </div>
+
+        ${ev.description ? `<div style="margin-bottom:14px; line-height:1.5;">${escapeHtml(ev.description)}</div>`
+                        : `<div class="muted" style="margin-bottom:14px;">Keine Beschreibung.</div>`}
       `;
 
       const list = members.map(m => {
@@ -812,6 +1014,11 @@
 
       openModal(ev.title || "Termin", header + `<h3 style="margin:10px 0 8px 0; font-size:14px;">Zusagen</h3>` + list);
 
+      // ICS button
+      const icsBtn = document.getElementById("icsBtn");
+      icsBtn?.addEventListener("click", () => downloadIcsForEvent(ev));
+
+      // RSVP buttons
       modalBody.querySelectorAll("[data-rsvp]").forEach(btn => {
         btn.addEventListener("click", async () => {
           const status = btn.getAttribute("data-rsvp");
@@ -824,7 +1031,6 @@
               updated_at: new Date().toISOString()
             }], "event_id,member_name");
 
-            // refresh overlay counts
             await openEventOverlay(ev);
           }catch(e){
             alert(e.message);
@@ -877,6 +1083,7 @@
         saveStatus.textContent = "";
         setPage("home");
         await loadEventsForCalendar();
+        await showNewEventsDock(); // new event may appear for others
       }catch(e){
         saveStatus.innerHTML = `<span class="danger">Fehler: ${escapeHtml(e.message)}</span>`;
       }finally{
@@ -912,6 +1119,7 @@
         setPage("home");
         await loadMembers();
         await loadEventsForCalendar();
+        await showNewEventsDock();
 
         authStatus.textContent = "";
       }catch(err){
@@ -928,6 +1136,7 @@
       clearSession();
       setAuthed(false);
       setPage("home");
+      notifyDock.innerHTML = "";
     });
 
     // Init
@@ -946,6 +1155,7 @@
         setPage("home");
         await loadMembers();
         await loadEventsForCalendar();
+        await showNewEventsDock();
       }catch{
         clearSession();
         setAuthed(false);
