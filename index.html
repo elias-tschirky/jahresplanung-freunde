@@ -235,7 +235,7 @@
       .chip{ font-size:11px; padding:5px 9px; }
     }
 
-    /* Notify dock */
+    /* Notify dock (desktop) */
     #notifyDock{
       position: fixed;
       left: 18px;
@@ -253,17 +253,33 @@
     @media (max-width: 900px){
       #notifyDock{ display:none; }
     }
+
+    /* Mobile: hide grid calendar + show agenda */
+    #mobileAgenda{ display:none; }
+    @media (max-width: 700px){
+      .calendarGrid, .weekdayRow{ display:none; }
+      #mobileAgenda{ display:grid; gap:12px; }
+    }
+
+    /* Mobile notify sheet */
+    #mobileNotify{ display:none; }
+    @media (max-width: 900px){
+      #mobileNotify{ display:block; }
+    }
   </style>
 </head>
 
 <body>
-  <!-- Notifications (new events since last visit) -->
+  <!-- Notifications (desktop dock) -->
   <div id="notifyDock"></div>
 
   <main class="grid">
     <header>
       <h1>Jahresplanung</h1>
-      <div class="sub">Home zeigt den Monatskalender. Klick auf einen Tag öffnet Details. Neue Termine seit deinem letzten Besuch erscheinen links als Hinweis – einmal zusagen/absagen, dann verschwinden sie.</div>
+      <div class="sub">
+        Auf Desktop siehst du den Monatskalender. Am Handy gibt’s eine Agenda-Liste (viel nicer).
+        Neue Termine erscheinen: Desktop links, Mobile als Panel von unten.
+      </div>
 
       <div class="row" style="padding-top:10px; justify-content:space-between;">
         <div class="row">
@@ -322,6 +338,10 @@
         </div>
 
         <div id="calendarGrid" class="calendarGrid"></div>
+
+        <!-- Mobile agenda -->
+        <div id="mobileAgenda" class="grid"></div>
+
         <div id="homeStatus" class="muted"></div>
       </section>
 
@@ -419,13 +439,29 @@
     </div>
   </div>
 
+  <!-- Mobile notify sheet -->
+  <div id="mobileNotify" class="hidden" style="
+    position:fixed;
+    left:0; right:0; bottom:0;
+    max-height:75vh;
+    background:rgba(15,18,26,.96);
+    backdrop-filter:blur(12px);
+    border-top-left-radius:20px;
+    border-top-right-radius:20px;
+    padding:16px;
+    z-index:99999;
+    overflow:auto;
+    border-top:1px solid rgba(255,255,255,.12);
+    box-shadow: 0 -20px 60px rgba(0,0,0,.45);
+  "></div>
+
   <script type="module">
     // ====== SET THESE TWO ======
     const SUPABASE_URL = "https://upmqtqspisdlgsnkpaam.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwbXF0cXNwaXNkbGdzbmtwYWFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMDk3NjIsImV4cCI6MjA4MTU4NTc2Mn0.FwGThG6nyM8K8GhcCmtWhoYbqqXJGkBoc8rOHG-6k00";
 
     const AUTH_URL = `${SUPABASE_URL}/auth/v1`;
-    const LS_KEY = "sb_session_calendar_v2";
+    const LS_KEY = "sb_session_calendar_mobile_v1";
     let session = null;
 
     function saveSession(s){ session = s; localStorage.setItem(LS_KEY, JSON.stringify(s)); }
@@ -462,6 +498,8 @@
     const nextMonth = document.getElementById("nextMonth");
     const todayBtn = document.getElementById("todayBtn");
 
+    const mobileAgenda = document.getElementById("mobileAgenda");
+
     const titleInput = document.getElementById("titleInput");
     const organizerInput = document.getElementById("organizerInput");
     const startInput = document.getElementById("startInput");
@@ -484,6 +522,9 @@
     const closeModalBtn = document.getElementById("closeModalBtn");
 
     const notifyDock = document.getElementById("notifyDock");
+    const mobileNotify = document.getElementById("mobileNotify");
+
+    function isMobile(){ return window.matchMedia("(max-width: 900px)").matches; }
 
     function setAuthed(isAuthed, email=""){
       loginSection.classList.toggle("hidden", isAuthed);
@@ -687,31 +728,8 @@
       `;
     }
 
-    async function showNewEventsDock(){
-      // only desktop
-      if (window.matchMedia("(max-width: 900px)").matches) {
-        notifyDock.innerHTML = "";
-        return;
-      }
-
-      const seenAfter = getSeenTs();
-
-      // NOTE: requires created_at column (Supabase default)
-      const newEvents = await sbSelect("events", {
-        select: "*",
-        order: "created_at.asc",
-        created_at: "gt." + seenAfter
-      });
-
-      if(!newEvents.length){
-        notifyDock.innerHTML = "";
-        return;
-      }
-
-      notifyDock.innerHTML = newEvents.map(renderNotifyCard).join("");
-
-      // wire buttons
-      notifyDock.querySelectorAll("[data-open]").forEach(btn => {
+    function wireNotifyContainer(container, newEvents){
+      container.querySelectorAll("[data-open]").forEach(btn => {
         btn.addEventListener("click", async () => {
           const id = btn.getAttribute("data-open");
           const ev = allEvents.find(e => e.id === id) || newEvents.find(e => e.id === id);
@@ -719,7 +737,7 @@
         });
       });
 
-      notifyDock.querySelectorAll("[data-nrsvp]").forEach(btn => {
+      container.querySelectorAll("[data-nrsvp]").forEach(btn => {
         btn.addEventListener("click", async () => {
           const status = btn.getAttribute("data-nrsvp");
           const eventId = btn.getAttribute("data-evid");
@@ -738,8 +756,10 @@
 
             btn.closest(".box")?.remove();
 
-            if(!notifyDock.querySelector(".box")){
-              notifyDock.innerHTML = "";
+            // If empty -> hide + set seen timestamp
+            if(!container.querySelector(".box")){
+              if(container === mobileNotify) mobileNotify.classList.add("hidden");
+              container.innerHTML = "";
               setSeenTsNow();
             }
           }catch(e){
@@ -747,6 +767,51 @@
           }
         });
       });
+    }
+
+    async function showNewEventsUI(){
+      const seenAfter = getSeenTs();
+
+      // requires created_at column
+      const newEvents = await sbSelect("events", {
+        select: "*",
+        order: "created_at.asc",
+        created_at: "gt." + seenAfter
+      });
+
+      // Desktop dock
+      if(!isMobile()){
+        if(!newEvents.length){
+          notifyDock.innerHTML = "";
+        } else {
+          notifyDock.innerHTML = newEvents.map(renderNotifyCard).join("");
+          wireNotifyContainer(notifyDock, newEvents);
+        }
+      }
+
+      // Mobile bottom sheet
+      if(isMobile()){
+        if(!newEvents.length){
+          mobileNotify.classList.add("hidden");
+          mobileNotify.innerHTML = "";
+          return;
+        }
+
+        mobileNotify.innerHTML = `
+          <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:10px;">
+            <div style="font-weight:900;">Neue Termine</div>
+            <button class="secondary" id="closeMobileNotify">Später</button>
+          </div>
+          <div class="muted" style="font-size:13px; margin-bottom:10px;">
+            Bitte kurz abstimmen – danach verschwindet die Meldung.
+          </div>
+          ${newEvents.map(renderNotifyCard).join("")}
+        `;
+        mobileNotify.classList.remove("hidden");
+        document.getElementById("closeMobileNotify").onclick = () => mobileNotify.classList.add("hidden");
+
+        wireNotifyContainer(mobileNotify, newEvents);
+      }
     }
 
     // ===== Calendar helpers =====
@@ -788,6 +853,7 @@
         allEvents = await sbSelect("events", { select:"*", order:"date.asc" });
         homeStatus.textContent = "";
         renderCalendar();
+        renderMobileAgenda();
       }catch(e){
         homeStatus.innerHTML = `<span class="danger">Fehler: ${escapeHtml(e.message)}</span>`;
       }
@@ -852,6 +918,42 @@
       });
     }
 
+    function renderMobileAgenda(){
+      if(!mobileAgenda) return;
+
+      // On desktop we can keep it empty
+      if(!window.matchMedia("(max-width: 700px)").matches){
+        mobileAgenda.innerHTML = "";
+        return;
+      }
+
+      const today = isoDate(new Date());
+      const upcoming = allEvents
+        .filter(ev => (ev.end_date || ev.date) >= today)
+        .sort((a,b) => a.date.localeCompare(b.date))
+        .slice(0, 25);
+
+      if(!upcoming.length){
+        mobileAgenda.innerHTML = `<div class="muted">Keine kommenden Termine.</div>`;
+        return;
+      }
+
+      mobileAgenda.innerHTML = upcoming.map(ev => `
+        <div class="card" style="cursor:pointer;">
+          <div style="font-weight:900;">${escapeHtml(ev.title || "Termin")}</div>
+          <div class="muted" style="margin-top:4px; font-size:13px;">
+            ${escapeHtml(ev.date)}${ev.end_date && ev.end_date !== ev.date ? " – " + escapeHtml(ev.end_date) : ""}
+            ${ev.organizer ? " · " + escapeHtml(ev.organizer) : ""}
+          </div>
+          ${ev.description ? `<div class="muted" style="margin-top:8px; font-size:13px; line-height:1.4;">${escapeHtml(ev.description)}</div>` : ""}
+        </div>
+      `).join("");
+
+      mobileAgenda.querySelectorAll(".card").forEach((el, i) => {
+        el.addEventListener("click", () => openEventOverlay(upcoming[i]));
+      });
+    }
+
     function statusLabel(s){
       if(s === "yes") return "Dabei";
       if(s === "maybe") return "Vielleicht";
@@ -898,11 +1000,7 @@
 
     // ===== ICS (Add to calendar) =====
     function pad2(n){ return String(n).padStart(2,"0"); }
-    function icsDateUTC(yyyyMmDd){
-      // all-day event, end date in ICS is exclusive. We'll handle that outside.
-      // format: YYYYMMDD
-      return yyyyMmDd.replaceAll("-", "");
-    }
+    function icsDateUTC(yyyyMmDd){ return yyyyMmDd.replaceAll("-", ""); }
     function icsEscape(text){
       return (text || "")
         .replaceAll("\\", "\\\\")
@@ -913,12 +1011,10 @@
 
     function downloadIcsForEvent(ev){
       const title = ev.title || "Termin";
-      const start = ev.date; // YYYY-MM-DD
+      const start = ev.date;
       const endInclusive = ev.end_date || ev.date;
 
-      // ICS all-day end is exclusive -> +1 day
       const endExclusive = isoDate(addDays(new Date(endInclusive + "T00:00:00"), 1));
-
       const dtStart = icsDateUTC(start);
       const dtEnd = icsDateUTC(endExclusive);
 
@@ -1014,11 +1110,8 @@ END:VCALENDAR`;
 
       openModal(ev.title || "Termin", header + `<h3 style="margin:10px 0 8px 0; font-size:14px;">Zusagen</h3>` + list);
 
-      // ICS button
-      const icsBtn = document.getElementById("icsBtn");
-      icsBtn?.addEventListener("click", () => downloadIcsForEvent(ev));
+      document.getElementById("icsBtn")?.addEventListener("click", () => downloadIcsForEvent(ev));
 
-      // RSVP buttons
       modalBody.querySelectorAll("[data-rsvp]").forEach(btn => {
         btn.addEventListener("click", async () => {
           const status = btn.getAttribute("data-rsvp");
@@ -1083,7 +1176,7 @@ END:VCALENDAR`;
         saveStatus.textContent = "";
         setPage("home");
         await loadEventsForCalendar();
-        await showNewEventsDock(); // new event may appear for others
+        await showNewEventsUI();
       }catch(e){
         saveStatus.innerHTML = `<span class="danger">Fehler: ${escapeHtml(e.message)}</span>`;
       }finally{
@@ -1119,7 +1212,7 @@ END:VCALENDAR`;
         setPage("home");
         await loadMembers();
         await loadEventsForCalendar();
-        await showNewEventsDock();
+        await showNewEventsUI();
 
         authStatus.textContent = "";
       }catch(err){
@@ -1137,6 +1230,8 @@ END:VCALENDAR`;
       setAuthed(false);
       setPage("home");
       notifyDock.innerHTML = "";
+      mobileNotify.classList.add("hidden");
+      mobileNotify.innerHTML = "";
     });
 
     // Init
@@ -1155,12 +1250,19 @@ END:VCALENDAR`;
         setPage("home");
         await loadMembers();
         await loadEventsForCalendar();
-        await showNewEventsDock();
+        await showNewEventsUI();
       }catch{
         clearSession();
         setAuthed(false);
       }
     })();
+
+    // Re-render agenda on resize (nice for rotate)
+    window.addEventListener("resize", () => {
+      renderMobileAgenda();
+      // update notify UI if breakpoint changed
+      // (safe try/catch because it calls Supabase only on login flows; here we just keep display)
+    });
   </script>
 </body>
 </html>
