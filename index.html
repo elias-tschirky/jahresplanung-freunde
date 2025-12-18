@@ -16,6 +16,10 @@
       --shadow2:0 10px 30px rgba(0,0,0,.25);
       --radius:18px; --radius2:14px;
       --danger:#ff7b7b;
+      --chipbg: rgba(255,255,255,.08);
+      --chipbd: rgba(255,255,255,.16);
+      --accent1: rgba(96,165,250,.95);
+      --accent2: rgba(168,85,247,.85);
     }
 
     *{ box-sizing:border-box; }
@@ -32,10 +36,25 @@
       padding:28px 18px 50px;
     }
 
-    main{ max-width:980px; margin:0 auto; display:grid; gap:16px; }
+    main{ max-width:1100px; margin:0 auto; display:grid; gap:16px; }
     header{ padding:18px 18px 6px; }
     h1{ margin:0; font-size:34px; letter-spacing:-0.02em; line-height:1.1; }
-    .sub{ margin-top:10px; color:var(--muted); max-width:70ch; line-height:1.5; }
+    .sub{ margin-top:10px; color:var(--muted); max-width:80ch; line-height:1.5; }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .grid{ display:grid; gap:14px; }
+    .two{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media (max-width:900px){ .two{ grid-template-columns:1fr; } h1{ font-size:30px; } }
+
+    .box{
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      box-shadow:var(--shadow);
+      padding:16px;
+      backdrop-filter:blur(10px);
+    }
+    .box h2{ margin:0 0 10px 0; font-size:16px; letter-spacing:-0.01em; }
 
     .badge{
       display:inline-flex; align-items:center; gap:8px;
@@ -51,26 +70,6 @@
       background:rgba(52,211,153,.9);
       box-shadow:0 0 0 4px rgba(52,211,153,.14);
     }
-
-    .grid{ display:grid; gap:14px; }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .two{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    @media (max-width:780px){
-      .two{ grid-template-columns:1fr; }
-      h1{ font-size:30px; }
-    }
-
-    .box{
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-      box-shadow:var(--shadow);
-      padding:16px;
-      backdrop-filter:blur(10px);
-    }
-    .box h2{ margin:0 0 10px 0; font-size:16px; letter-spacing:-0.01em; }
-
-    label.grid > span{ font-size:13px; color:var(--muted); }
 
     input,select,textarea,button{
       font:inherit;
@@ -96,7 +95,7 @@
       cursor:pointer;
       color:rgba(255,255,255,.95);
       border:0;
-      background:linear-gradient(135deg, rgba(96,165,250,.95), rgba(168,85,247,.85));
+      background:linear-gradient(135deg, var(--accent1), var(--accent2));
       box-shadow:0 12px 28px rgba(96,165,250,.18);
       transition:transform .08s ease, filter .12s ease;
       padding:11px 14px;
@@ -105,32 +104,105 @@
     button:hover{ filter:brightness(1.05); }
     button:active{ transform:translateY(1px); }
     button:disabled{ opacity:.6; cursor:not-allowed; }
+
     button.secondary{
       background:rgba(255,255,255,.08);
       color:rgba(255,255,255,.88);
       border:1px solid var(--border);
       box-shadow:none;
     }
-
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:7px 10px; border-radius:999px;
-      border:1px solid var(--border);
-      background:rgba(255,255,255,.06);
-      color:rgba(255,255,255,.86);
-      font-size:14px;
-    }
-    .card{
-      border:1px solid var(--border);
-      border-radius:var(--radius2);
-      padding:14px;
-      background:rgba(255,255,255,.06);
-      box-shadow:var(--shadow2);
-    }
-
     .muted{ color:var(--muted); }
     .danger{ color:var(--danger); }
     .hidden{ display:none !important; }
+
+    /* Nav tabs */
+    .tabs{
+      display:flex; gap:10px; flex-wrap:wrap;
+      padding:10px; border:1px solid var(--border);
+      border-radius:999px; background:rgba(255,255,255,.06);
+      width: fit-content;
+    }
+    .tab{
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid transparent;
+      background:transparent;
+      color:rgba(255,255,255,.85);
+      cursor:pointer;
+      font-weight:600;
+    }
+    .tab.active{
+      background:rgba(255,255,255,.10);
+      border-color:rgba(255,255,255,.18);
+    }
+
+    /* Calendar */
+    .calHead{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; flex-wrap:wrap;
+      margin-bottom:8px;
+    }
+    .calTitle{
+      font-size:18px; font-weight:700; letter-spacing:-0.01em;
+    }
+    .calNav{ display:flex; gap:8px; align-items:center; }
+    .calBtn{
+      padding:9px 11px; border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.08);
+      color:rgba(255,255,255,.9);
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .weekdayRow{
+      display:grid; grid-template-columns:repeat(7,1fr);
+      gap:10px; margin-bottom:10px;
+      color:rgba(255,255,255,.75);
+      font-size:13px; font-weight:600;
+    }
+
+    .calendarGrid{
+      display:grid;
+      grid-template-columns:repeat(7, 1fr);
+      gap:10px;
+    }
+
+    .dayCell{
+      min-height:120px;
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:rgba(255,255,255,.05);
+      box-shadow:var(--shadow2);
+      padding:10px;
+      position:relative;
+      overflow:hidden;
+    }
+    .dayCell.dim{ opacity:.45; }
+    .dayNum{
+      position:absolute;
+      top:10px; left:10px;
+      font-weight:700;
+      color:rgba(255,255,255,.88);
+      font-size:13px;
+    }
+    .chips{
+      margin-top:24px;
+      display:grid;
+      gap:6px;
+    }
+    .chip{
+      border:1px solid var(--chipbd);
+      background:var(--chipbg);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      line-height:1.2;
+      color:rgba(255,255,255,.88);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
   </style>
 </head>
 
@@ -138,24 +210,36 @@
   <main class="grid">
     <header>
       <h1>Jahresplanung</h1>
-      <div class="sub">Nur mit Login. Danach könnt ihr Teilnehmer und Termine live verwalten.</div>
-      <div class="row" style="padding-top:10px;">
-        <div class="badge"><span class="dot"></span> Live · Supabase</div>
-        <button id="logoutBtn" class="secondary hidden">Logout</button>
-        <span id="whoami" class="muted"></span>
+      <div class="sub">Home zeigt den großen Monatskalender. Neue Termine trägst du auf der zweiten Seite ein.</div>
+
+      <div class="row" style="padding-top:10px; justify-content:space-between;">
+        <div class="row">
+          <div class="badge"><span class="dot"></span> Live · Supabase</div>
+          <span id="whoami" class="muted"></span>
+        </div>
+        <div class="row">
+          <button id="logoutBtn" class="secondary hidden">Logout</button>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <div class="tabs">
+          <button id="tabHome" class="tab active">Home</button>
+          <button id="tabNew" class="tab">Neuer Termin</button>
+        </div>
       </div>
     </header>
 
-    <!-- LOGIN (sichtbar, bis eingeloggt) -->
+    <!-- LOGIN -->
     <section id="loginSection" class="box grid">
       <h2>Login</h2>
       <div class="two">
         <label class="grid">
-          <span>Email</span>
-          <input id="emailInput" type="email" placeholder="deinname@mail.com" autocomplete="username" />
+          <span class="muted">Email</span>
+          <input id="emailInput" type="email" placeholder="gruppen@login.de" autocomplete="username" />
         </label>
         <label class="grid">
-          <span>Passwort</span>
+          <span class="muted">Passwort</span>
           <input id="pwInput" type="password" placeholder="••••••••" autocomplete="current-password" />
         </label>
       </div>
@@ -163,32 +247,63 @@
         <button id="loginBtn">Einloggen</button>
         <span id="authStatus" class="muted"></span>
       </div>
-      <div class="muted" style="font-size:13px;">
-        Tipp: Wenn du ein „Gruppen-Login“ willst, leg in Supabase einfach genau einen User an und teilt Email+Passwort.
-      </div>
     </section>
 
-    <!-- APP (unsichtbar, bis eingeloggt) -->
+    <!-- APP -->
     <section id="appSection" class="grid hidden">
-      <div class="box grid">
-        <h2>Wer macht mit?</h2>
-        <div class="row">
-          <input id="nameInput" placeholder="Dein Name" style="flex:1; min-width:220px;" />
-          <button id="joinBtn">Ich mache mit</button>
-        </div>
-        <div id="participants" class="row"></div>
-        <div id="pStatus" class="muted"></div>
-      </div>
 
-      <div class="box grid">
-        <h2>Termin hinzufügen</h2>
+      <!-- HOME: CALENDAR -->
+      <section id="pageHome" class="box grid">
+        <div class="calHead">
+          <div class="calTitle" id="calTitle">Monat</div>
+          <div class="calNav">
+            <button class="calBtn" id="prevMonth">←</button>
+            <button class="calBtn" id="todayBtn">Heute</button>
+            <button class="calBtn" id="nextMonth">→</button>
+          </div>
+        </div>
+
+        <div class="weekdayRow">
+          <div>Mo</div><div>Di</div><div>Mi</div><div>Do</div><div>Fr</div><div>Sa</div><div>So</div>
+        </div>
+
+        <div id="calendarGrid" class="calendarGrid"></div>
+        <div id="homeStatus" class="muted"></div>
+      </section>
+
+      <!-- NEW EVENT PAGE -->
+      <section id="pageNew" class="box grid hidden">
+        <h2>Termin eintragen</h2>
+
         <div class="two">
           <label class="grid">
-            <span>Datum</span>
-            <input id="dateInput" type="date" />
+            <span class="muted">Titel</span>
+            <input id="titleInput" placeholder="z.B. Brunch / Wandern / Städtetrip" />
           </label>
           <label class="grid">
-            <span>Typ</span>
+            <span class="muted">Organisiert von</span>
+            <input id="organizerInput" placeholder="Name / Team" />
+          </label>
+        </div>
+
+        <div class="two">
+          <label class="grid">
+            <span class="muted">Startdatum</span>
+            <input id="startInput" type="date" />
+          </label>
+          <label class="grid">
+            <span class="muted">Anzahl Tage</span>
+            <input id="daysInput" type="number" min="1" value="1" />
+          </label>
+        </div>
+
+        <div class="two">
+          <label class="grid">
+            <span class="muted">Budget (optional)</span>
+            <input id="budgetInput" type="number" min="0" step="1" placeholder="z.B. 50" />
+          </label>
+          <label class="grid">
+            <span class="muted">Typ</span>
             <select id="typeInput">
               <option value="day">Tag</option>
               <option value="weekend">Wochenende</option>
@@ -197,73 +312,40 @@
         </div>
 
         <label class="grid">
-          <span>Titel (optional)</span>
-          <input id="titleInput" placeholder="z.B. Brunch / Wandern / Städtetrip" />
-        </label>
-
-        <div class="two">
-          <label class="grid">
-            <span>Planer A (optional)</span>
-            <input id="plannerAInput" placeholder="Name" />
-          </label>
-          <label class="grid">
-            <span>Planer B (optional)</span>
-            <input id="plannerBInput" placeholder="Name" />
-          </label>
-        </div>
-
-        <label class="grid">
-          <span>Notiz (optional)</span>
-          <textarea id="notesInput" placeholder="Budget, Ideen, Treffpunkt..." style="min-height:80px;"></textarea>
+          <span class="muted">Beschreibung (kurz)</span>
+          <textarea id="descInput" style="min-height:110px;" placeholder="Was machen wir? Wo? Was muss man mitbringen?"></textarea>
         </label>
 
         <div class="row">
-          <button id="addEventBtn">Termin speichern</button>
-          <span id="eStatus" class="muted"></span>
+          <button id="saveEventBtn">Speichern</button>
+          <button id="goHomeBtn" class="secondary">Zurück zum Kalender</button>
+          <span id="saveStatus" class="muted"></span>
         </div>
-      </div>
+      </section>
 
-      <div class="box grid">
-        <h2>Aktuelle Termine</h2>
-        <div id="events" class="grid"></div>
-        <div id="eventsEmpty" class="muted"></div>
-      </div>
     </section>
   </main>
 
   <script type="module">
-    // 1) HIER EINTRAGEN:
+    // HIER EINTRAGEN:
     const SUPABASE_URL = "https://upmqtqspisdlgsnkpaam.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwbXF0cXNwaXNkbGdzbmtwYWFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMDk3NjIsImV4cCI6MjA4MTU4NTc2Mn0.FwGThG6nyM8K8GhcCmtWhoYbqqXJGkBoc8rOHG-6k00";
 
     const AUTH_URL = `${SUPABASE_URL}/auth/v1`;
-
-    // Session speichern (damit man nach Reload eingeloggt bleibt)
-    const LS_KEY = "sb_session_v1";
+    const LS_KEY = "sb_session_v2";
     let session = null;
 
-    function saveSession(s) {
-      session = s;
-      localStorage.setItem(LS_KEY, JSON.stringify(s));
-    }
-    function loadSession() {
-      try {
-        const raw = localStorage.getItem(LS_KEY);
-        if (raw) session = JSON.parse(raw);
-      } catch {}
-    }
-    function clearSession() {
-      session = null;
-      localStorage.removeItem(LS_KEY);
-    }
+    function saveSession(s){ session = s; localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+    function loadSession(){ try{ const raw = localStorage.getItem(LS_KEY); if(raw) session = JSON.parse(raw); }catch{} }
+    function clearSession(){ session=null; localStorage.removeItem(LS_KEY); }
 
-    function escapeHtml(s) {
+    function escapeHtml(s){
       return (s ?? "").toString().replace(/[&<>"']/g, c => ({
         "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
       }[c]));
     }
 
-    // UI refs
+    // UI
     const loginSection = document.getElementById("loginSection");
     const appSection = document.getElementById("appSection");
     const emailInput = document.getElementById("emailInput");
@@ -273,24 +355,30 @@
     const authStatus = document.getElementById("authStatus");
     const whoami = document.getElementById("whoami");
 
-    const participantsEl = document.getElementById("participants");
-    const pStatusEl = document.getElementById("pStatus");
-    const nameInput = document.getElementById("nameInput");
-    const joinBtn = document.getElementById("joinBtn");
+    const tabHome = document.getElementById("tabHome");
+    const tabNew = document.getElementById("tabNew");
+    const pageHome = document.getElementById("pageHome");
+    const pageNew = document.getElementById("pageNew");
 
-    const eventsEl = document.getElementById("events");
-    const eventsEmptyEl = document.getElementById("eventsEmpty");
-    const eStatusEl = document.getElementById("eStatus");
+    const calTitle = document.getElementById("calTitle");
+    const calendarGrid = document.getElementById("calendarGrid");
+    const homeStatus = document.getElementById("homeStatus");
+    const prevMonth = document.getElementById("prevMonth");
+    const nextMonth = document.getElementById("nextMonth");
+    const todayBtn = document.getElementById("todayBtn");
 
-    const dateInput = document.getElementById("dateInput");
-    const typeInput = document.getElementById("typeInput");
     const titleInput = document.getElementById("titleInput");
-    const plannerAInput = document.getElementById("plannerAInput");
-    const plannerBInput = document.getElementById("plannerBInput");
-    const notesInput = document.getElementById("notesInput");
-    const addEventBtn = document.getElementById("addEventBtn");
+    const organizerInput = document.getElementById("organizerInput");
+    const startInput = document.getElementById("startInput");
+    const daysInput = document.getElementById("daysInput");
+    const budgetInput = document.getElementById("budgetInput");
+    const typeInput = document.getElementById("typeInput");
+    const descInput = document.getElementById("descInput");
+    const saveEventBtn = document.getElementById("saveEventBtn");
+    const goHomeBtn = document.getElementById("goHomeBtn");
+    const saveStatus = document.getElementById("saveStatus");
 
-    function setAuthed(isAuthed, email = "") {
+    function setAuthed(isAuthed, email=""){
       loginSection.classList.toggle("hidden", isAuthed);
       appSection.classList.toggle("hidden", !isAuthed);
       logoutBtn.classList.toggle("hidden", !isAuthed);
@@ -298,234 +386,287 @@
       authStatus.textContent = isAuthed ? "" : "Bitte einloggen";
     }
 
-    async function signInWithPassword(email, password) {
+    function setPage(which){
+      const isHome = which === "home";
+      tabHome.classList.toggle("active", isHome);
+      tabNew.classList.toggle("active", !isHome);
+      pageHome.classList.toggle("hidden", !isHome);
+      pageNew.classList.toggle("hidden", isHome);
+    }
+
+    // Auth
+    async function signInWithPassword(email, password){
       const r = await fetch(`${AUTH_URL}/token?grant_type=password`, {
-        method: "POST",
-        headers: {
-          "apikey": SUPABASE_ANON_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+        method:"POST",
+        headers:{ "apikey": SUPABASE_ANON_KEY, "Content-Type":"application/json" },
+        body: JSON.stringify({ email, password })
       });
-
       const txt = await r.text();
-      if (!r.ok) throw new Error(txt);
-
+      if(!r.ok) throw new Error(txt);
       const data = JSON.parse(txt);
-      const now = Math.floor(Date.now() / 1000);
-
+      const now = Math.floor(Date.now()/1000);
       saveSession({
         access_token: data.access_token,
         refresh_token: data.refresh_token,
         expires_at: now + data.expires_in,
         token_type: data.token_type,
       });
-
-      return data;
     }
 
-    async function fetchUserEmail() {
-      if (!session?.access_token) return "";
+    async function refreshIfNeeded(){
+      if(!session?.access_token || !session?.refresh_token || !session?.expires_at) return;
+      const now = Math.floor(Date.now()/1000);
+      if(session.expires_at - now > 60) return;
+
+      const r = await fetch(`${AUTH_URL}/token?grant_type=refresh_token`, {
+        method:"POST",
+        headers:{ "apikey": SUPABASE_ANON_KEY, "Content-Type":"application/json" },
+        body: JSON.stringify({ refresh_token: session.refresh_token })
+      });
+      const txt = await r.text();
+      if(!r.ok) throw new Error(txt);
+      const data = JSON.parse(txt);
+      saveSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        expires_at: now + data.expires_in,
+        token_type: data.token_type,
+      });
+    }
+
+    async function fetchUserEmail(){
+      if(!session?.access_token) return "";
       const r = await fetch(`${AUTH_URL}/user`, {
-        headers: {
+        headers:{
           "apikey": SUPABASE_ANON_KEY,
-          "Authorization": "Bearer " + session.access_token,
+          "Authorization": "Bearer " + session.access_token
         }
       });
-      if (!r.ok) return "";
+      if(!r.ok) return "";
       const u = await r.json();
       return u?.email || "";
     }
 
-    async function refreshIfNeeded() {
-      if (!session?.access_token || !session?.refresh_token || !session?.expires_at) return;
-
-      const now = Math.floor(Date.now() / 1000);
-      if (session.expires_at - now > 60) return;
-
-      const r = await fetch(`${AUTH_URL}/token?grant_type=refresh_token`, {
-        method: "POST",
-        headers: {
-          "apikey": SUPABASE_ANON_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refresh_token: session.refresh_token }),
-      });
-
-      const txt = await r.text();
-      if (!r.ok) throw new Error(txt);
-
-      const data = JSON.parse(txt);
-      saveSession({
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
-        expires_at: now + data.expires_in,
-        token_type: data.token_type,
-      });
-    }
-
-    // Supabase REST headers: immer User-Token benutzen (RLS)
+    // Supabase REST
     const headers = () => ({
       "apikey": SUPABASE_ANON_KEY,
       "Authorization": "Bearer " + (session?.access_token || ""),
-      "Content-Type": "application/json",
+      "Content-Type":"application/json",
     });
 
-    function qs(obj) {
+    function qs(obj){
       const s = new URLSearchParams();
-      for (const [k, v] of Object.entries(obj)) s.set(k, v);
+      for(const [k,v] of Object.entries(obj)) s.set(k,v);
       return s.toString();
     }
 
-    async function sbSelect(table, queryObj) {
+    async function sbSelect(table, queryObj){
       const url = `${SUPABASE_URL}/rest/v1/${table}?${qs(queryObj)}`;
       const r = await fetch(url, { headers: headers() });
       const txt = await r.text();
-      if (!r.ok) throw new Error(txt);
+      if(!r.ok) throw new Error(txt);
       return JSON.parse(txt);
     }
 
-    async function sbInsert(table, rows) {
+    async function sbInsert(table, rows){
       const url = `${SUPABASE_URL}/rest/v1/${table}`;
-      const r = await fetch(url, { method: "POST", headers: headers(), body: JSON.stringify(rows) });
+      const r = await fetch(url, { method:"POST", headers: headers(), body: JSON.stringify(rows) });
       const txt = await r.text();
-      if (!r.ok) throw new Error(txt);
+      if(!r.ok) throw new Error(txt);
       return true;
     }
 
-    async function sbDelete(table, filter) {
-      const url = `${SUPABASE_URL}/rest/v1/${table}?${qs(filter)}`;
-      const r = await fetch(url, { method: "DELETE", headers: headers() });
-      const txt = await r.text();
-      if (!r.ok) throw new Error(txt);
-      return true;
+    // Calendar logic
+    let view = new Date();
+    view.setDate(1);
+
+    const monthNames = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+    let allEvents = []; // cached
+
+    function isoDate(d){
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${day}`;
     }
 
-    async function loadParticipants() {
-      pStatusEl.textContent = "Lade…";
-      try {
-        const rows = await sbSelect("participants", { select: "*", order: "created_at.asc" });
-        participantsEl.innerHTML = rows.map(r => `<span class="pill">${escapeHtml(r.name)}</span>`).join("");
-        pStatusEl.textContent = rows.length ? "" : "Noch niemand eingetragen.";
-      } catch (e) {
-        pStatusEl.innerHTML = `<span class="danger">Fehler: ${escapeHtml(e.message)}</span>`;
-      }
+    function addDays(dateObj, n){
+      const d = new Date(dateObj);
+      d.setDate(d.getDate()+n);
+      return d;
     }
 
-    async function loadEvents() {
-      eventsEmptyEl.textContent = "Lade…";
-      try {
-        const rows = await sbSelect("events", { select: "*", order: "date.asc" });
-        if (!rows.length) {
-          eventsEl.innerHTML = "";
-          eventsEmptyEl.textContent = "Noch keine Termine eingetragen.";
-          return;
+    // Build a map: YYYY-MM-DD -> array of chips
+    function buildEventIndex(events){
+      const idx = new Map();
+      for(const ev of events){
+        const start = ev.date; // YYYY-MM-DD
+        const end = ev.end_date || ev.date;
+        // iterate days inclusive
+        let cur = new Date(start + "T00:00:00");
+        const last = new Date(end + "T00:00:00");
+        while(cur <= last){
+          const key = isoDate(cur);
+          if(!idx.has(key)) idx.set(key, []);
+          const label = ev.title || "Termin";
+          idx.get(key).push({ title: label, organizer: ev.organizer || "" });
+          cur = addDays(cur, 1);
         }
-        eventsEmptyEl.textContent = "";
-        eventsEl.innerHTML = rows.map(ev => `
-          <div class="card">
-            <div class="row" style="justify-content:space-between;">
-              <div>
-                <div><b>${escapeHtml(ev.date)}</b> • ${ev.type === "weekend" ? "Wochenende" : "Tag"}</div>
-                <div class="muted">${ev.title ? escapeHtml(ev.title) : "ohne Titel"}</div>
-                <div class="muted" style="margin-top:6px;">
-                  ${ev.planner_a || ev.planner_b ? `Planer: ${escapeHtml(ev.planner_a ?? "?")} & ${escapeHtml(ev.planner_b ?? "?")}` : "Planer noch offen"}
-                </div>
-                ${ev.notes ? `<div class="muted" style="margin-top:6px;">${escapeHtml(ev.notes)}</div>` : ""}
-              </div>
-              <button class="secondary" data-del="${escapeHtml(ev.id)}">Löschen</button>
-            </div>
-          </div>
-        `).join("");
+      }
+      return idx;
+    }
 
-        eventsEl.querySelectorAll("button[data-del]").forEach(btn => {
-          btn.addEventListener("click", async () => {
-            const id = btn.getAttribute("data-del");
-            if (!id) return;
-            if (!confirm("Diesen Termin wirklich löschen?")) return;
-            try {
-              await sbDelete("events", { id: "eq." + id });
-              await loadEvents();
-            } catch (e) {
-              alert(e.message);
-            }
-          });
-        });
-      } catch (e) {
-        eventsEmptyEl.innerHTML = `<span class="danger">Fehler: ${escapeHtml(e.message)}</span>`;
+    function renderCalendar(){
+      const y = view.getFullYear();
+      const m = view.getMonth();
+
+      calTitle.textContent = `${monthNames[m]} ${y}`;
+
+      // Monday-based: JS getDay(): Sun=0..Sat=6, convert to Mon=0..Sun=6
+      const first = new Date(y, m, 1);
+      const firstDowMon0 = (first.getDay() + 6) % 7;
+      const daysInMonth = new Date(y, m+1, 0).getDate();
+
+      // prev month days to show
+      const prevDays = firstDowMon0;
+      const prevMonthLast = new Date(y, m, 0).getDate();
+
+      const idx = buildEventIndex(allEvents);
+
+      const cells = [];
+      // 6 rows * 7 = 42 cells
+      for(let i=0;i<42;i++){
+        let cellDate, dim = false;
+        if(i < prevDays){
+          const dayNum = prevMonthLast - prevDays + 1 + i;
+          cellDate = new Date(y, m-1, dayNum);
+          dim = true;
+        } else if(i >= prevDays + daysInMonth){
+          const dayNum = i - (prevDays + daysInMonth) + 1;
+          cellDate = new Date(y, m+1, dayNum);
+          dim = true;
+        } else {
+          const dayNum = i - prevDays + 1;
+          cellDate = new Date(y, m, dayNum);
+        }
+
+        const key = isoDate(cellDate);
+        const chips = (idx.get(key) || [])
+          .slice(0,3)
+          .map(c => `<div class="chip">${escapeHtml(c.title)}${c.organizer ? " · " + escapeHtml(c.organizer) : ""}</div>`)
+          .join("");
+
+        const moreCount = Math.max(0, (idx.get(key)?.length || 0) - 3);
+        const more = moreCount ? `<div class="chip">+${moreCount} mehr</div>` : "";
+
+        cells.push(`
+          <div class="dayCell ${dim ? "dim" : ""}">
+            <div class="dayNum">${cellDate.getDate()}</div>
+            <div class="chips">${chips}${more}</div>
+          </div>
+        `);
+      }
+
+      calendarGrid.innerHTML = cells.join("");
+    }
+
+    async function loadEventsForCalendar(){
+      homeStatus.textContent = "Lade Termine…";
+      try{
+        allEvents = await sbSelect("events", { select:"*", order:"date.asc" });
+        homeStatus.textContent = "";
+        renderCalendar();
+      }catch(e){
+        homeStatus.innerHTML = `<span class="danger">Fehler: ${escapeHtml(e.message)}</span>`;
       }
     }
 
-    // Actions (nur wenn eingeloggt)
-    joinBtn.addEventListener("click", async () => {
-      const n = nameInput.value.trim();
-      if (!n) return;
-      joinBtn.disabled = true;
-      pStatusEl.textContent = "Speichere…";
-      try {
-        await sbInsert("participants", [{ name: n }]);
-        nameInput.value = "";
-        await loadParticipants();
-      } catch (e) {
-        pStatusEl.innerHTML = `<span class="danger">Fehler: ${escapeHtml(e.message)}</span>`;
-      } finally {
-        joinBtn.disabled = false;
+    // Event creation
+    function clampInt(n, fallback){
+      const x = parseInt(n, 10);
+      return Number.isFinite(x) && x > 0 ? x : fallback;
+    }
+
+    saveEventBtn.addEventListener("click", async () => {
+      const title = titleInput.value.trim() || null;
+      const organizer = organizerInput.value.trim() || null;
+      const start = startInput.value;
+      if(!start) return alert("Bitte Startdatum wählen.");
+
+      const days = clampInt(daysInput.value, 1);
+      const end = isoDate(addDays(new Date(start+"T00:00:00"), days-1));
+
+      const budgetVal = budgetInput.value.trim();
+      const budget = budgetVal ? Number(budgetVal) : null;
+      const description = descInput.value.trim() || null;
+      const type = typeInput.value;
+
+      saveEventBtn.disabled = true;
+      saveStatus.textContent = "Speichere…";
+      try{
+        await sbInsert("events", [{
+          date: start,
+          end_date: end,
+          title,
+          organizer,
+          budget,
+          description,
+          type,
+          planner_a: null,
+          planner_b: null,
+          notes: null
+        }]);
+
+        // reset
+        titleInput.value = "";
+        organizerInput.value = "";
+        startInput.value = "";
+        daysInput.value = "1";
+        budgetInput.value = "";
+        descInput.value = "";
+        typeInput.value = "day";
+
+        saveStatus.textContent = "";
+        setPage("home");
+        await loadEventsForCalendar();
+      }catch(e){
+        saveStatus.innerHTML = `<span class="danger">Fehler: ${escapeHtml(e.message)}</span>`;
+      }finally{
+        saveEventBtn.disabled = false;
       }
     });
 
-    addEventBtn.addEventListener("click", async () => {
-      const date = dateInput.value;
-      if (!date) return alert("Bitte ein Datum wählen.");
-      addEventBtn.disabled = true;
-      eStatusEl.textContent = "Speichere…";
-      try {
-        await sbInsert("events", [{
-          date,
-          type: typeInput.value,
-          title: titleInput.value.trim() || null,
-          planner_a: plannerAInput.value.trim() || null,
-          planner_b: plannerBInput.value.trim() || null,
-          notes: notesInput.value.trim() || null,
-        }]);
-        dateInput.value = "";
-        typeInput.value = "day";
-        titleInput.value = "";
-        plannerAInput.value = "";
-        plannerBInput.value = "";
-        notesInput.value = "";
-        await loadEvents();
-        eStatusEl.textContent = "";
-      } catch (e) {
-        eStatusEl.innerHTML = `<span class="danger">Fehler: ${escapeHtml(e.message)}</span>`;
-      } finally {
-        addEventBtn.disabled = false;
-      }
-    });
+    // Nav
+    tabHome.addEventListener("click", () => setPage("home"));
+    tabNew.addEventListener("click", () => setPage("new"));
+    goHomeBtn.addEventListener("click", () => setPage("home"));
+
+    prevMonth.addEventListener("click", () => { view = new Date(view.getFullYear(), view.getMonth()-1, 1); renderCalendar(); });
+    nextMonth.addEventListener("click", () => { view = new Date(view.getFullYear(), view.getMonth()+1, 1); renderCalendar(); });
+    todayBtn.addEventListener("click", () => { const t = new Date(); view = new Date(t.getFullYear(), t.getMonth(), 1); renderCalendar(); });
 
     // Login handlers
     loginBtn.addEventListener("click", async () => {
       const email = emailInput.value.trim();
       const pw = pwInput.value;
-      if (!email || !pw) return;
+      if(!email || !pw) return;
 
       loginBtn.disabled = true;
       authStatus.textContent = "Login…";
-
-      try {
+      try{
         await signInWithPassword(email, pw);
         await refreshIfNeeded();
         const e = await fetchUserEmail();
         setAuthed(true, e || email);
+        setPage("home");
+        await loadEventsForCalendar();
         authStatus.textContent = "";
-
-        await loadParticipants();
-        await loadEvents();
-      } catch (err) {
+      }catch(err){
         authStatus.textContent = "Login fehlgeschlagen";
         alert(err.message);
         clearSession();
         setAuthed(false);
-      } finally {
+      }finally{
         loginBtn.disabled = false;
       }
     });
@@ -535,21 +676,20 @@
       setAuthed(false);
     });
 
-    // Init on page load
+    // Init
     (async () => {
       loadSession();
-      if (!session?.access_token) {
+      if(!session?.access_token){
         setAuthed(false);
         return;
       }
-
-      try {
+      try{
         await refreshIfNeeded();
         const e = await fetchUserEmail();
         setAuthed(true, e);
-        await loadParticipants();
-        await loadEvents();
-      } catch {
+        setPage("home");
+        await loadEventsForCalendar();
+      }catch{
         clearSession();
         setAuthed(false);
       }
