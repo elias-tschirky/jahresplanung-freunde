@@ -4,319 +4,274 @@
   <meta charset="UTF-8" />
   <title>Jahresplanung Freunde</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
     :root{
-      --bg1: #0b1220;
-      --bg2: #0a2a2a;
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.70);
-      --border: rgba(255,255,255,.16);
-      --shadow: 0 20px 60px rgba(0,0,0,.35);
-      --shadow2: 0 10px 30px rgba(0,0,0,.25);
-      --radius: 18px;
-      --radius2: 14px;
+      --bg1:#0b1220; --bg2:#0a2a2a;
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.70);
+      --border:rgba(255,255,255,.16);
+      --shadow:0 20px 60px rgba(0,0,0,.35);
+      --shadow2:0 10px 30px rgba(0,0,0,.25);
+      --radius:18px; --radius2:14px;
+      --danger:#ff7b7b;
     }
 
     *{ box-sizing:border-box; }
-    html, body { height: 100%; }
+    html,body{ height:100%; }
     body{
       margin:0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      color: var(--text);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      color:var(--text);
       background:
         radial-gradient(900px 500px at 15% 10%, rgba(96,165,250,.30), transparent 60%),
         radial-gradient(800px 520px at 85% 20%, rgba(52,211,153,.24), transparent 55%),
         radial-gradient(900px 700px at 50% 90%, rgba(168,85,247,.18), transparent 60%),
-        linear-gradient(140deg, var(--bg1), var(--bg2));
-      padding: 28px 18px 50px;
+        linear-gradient(140deg,var(--bg1),var(--bg2));
+      padding:28px 18px 50px;
     }
 
-    main{ max-width: 980px; margin: 0 auto; display: grid; gap: 16px; }
-
-    header{ padding: 18px 18px 6px; }
-    h1{ margin: 0; font-size: 34px; letter-spacing: -0.02em; line-height: 1.1; }
-    header .sub{ margin-top: 10px; color: var(--muted); max-width: 70ch; line-height: 1.5; }
-
-    .topbar{ display:flex; align-items:center; justify-content:space-between; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+    main{ max-width:980px; margin:0 auto; display:grid; gap:16px; }
+    header{ padding:18px 18px 6px; }
+    h1{ margin:0; font-size:34px; letter-spacing:-0.02em; line-height:1.1; }
+    .sub{ margin-top:10px; color:var(--muted); max-width:70ch; line-height:1.5; }
 
     .badge{
       display:inline-flex; align-items:center; gap:8px;
-      padding: 8px 12px; border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      box-shadow: var(--shadow2);
-      color: var(--muted);
-      font-size: 13px;
+      padding:8px 12px; border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.06);
+      box-shadow:var(--shadow2);
+      color:var(--muted);
+      font-size:13px;
     }
     .dot{
-      width: 9px; height: 9px; border-radius: 999px;
-      background: rgba(52,211,153,.9);
-      box-shadow: 0 0 0 4px rgba(52,211,153,.14);
+      width:9px; height:9px; border-radius:999px;
+      background:rgba(52,211,153,.9);
+      box-shadow:0 0 0 4px rgba(52,211,153,.14);
     }
 
-    .grid{ display:grid; gap: 14px; }
+    .grid{ display:grid; gap:14px; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .two{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media (max-width:780px){
+      .two{ grid-template-columns:1fr; }
+      h1{ font-size:30px; }
+    }
 
     .box{
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-      box-shadow: var(--shadow);
-      padding: 16px;
-      backdrop-filter: blur(10px);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      box-shadow:var(--shadow);
+      padding:16px;
+      backdrop-filter:blur(10px);
     }
+    .box h2{ margin:0 0 10px 0; font-size:16px; letter-spacing:-0.01em; }
 
-    .box h2{ margin: 0 0 10px 0; font-size: 16px; letter-spacing: -0.01em; }
+    label.grid > span{ font-size:13px; color:var(--muted); }
 
-    .row{ display:flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-
-    .two{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 780px){
-      .two{ grid-template-columns: 1fr; }
-      h1{ font-size: 30px; }
+    input,select,textarea,button{
+      font:inherit;
+      border-radius:12px;
+      border:1px solid var(--border);
+      padding:11px 12px;
+      outline:none;
     }
-
-    label.grid > span{ font-size: 13px; color: var(--muted); }
-
-    input, select, textarea, button{
-      font: inherit;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      padding: 11px 12px;
-      outline: none;
+    input,select,textarea{
+      width:100%;
+      color:var(--text);
+      background:rgba(10,12,18,.35);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
     }
-
-    input, select, textarea{
-      width: 100%;
-      color: var(--text);
-      background: rgba(10,12,18,.35);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
-    }
-
-    input::placeholder, textarea::placeholder{ color: rgba(255,255,255,.45); }
-
-    input:focus, select:focus, textarea:focus{
-      border-color: rgba(96,165,250,.55);
-      box-shadow: 0 0 0 4px rgba(96,165,250,.15);
+    input::placeholder,textarea::placeholder{ color:rgba(255,255,255,.45); }
+    input:focus,select:focus,textarea:focus{
+      border-color:rgba(96,165,250,.55);
+      box-shadow:0 0 0 4px rgba(96,165,250,.15);
     }
 
     button{
-      width: fit-content;
-      cursor: pointer;
-      color: rgba(255,255,255,.95);
-      border: 0;
-      background: linear-gradient(135deg, rgba(96,165,250,.95), rgba(168,85,247,.85));
-      box-shadow: 0 12px 28px rgba(96,165,250,.18);
-      transition: transform .08s ease, filter .12s ease;
-      padding: 11px 14px;
-      font-weight: 600;
+      width:fit-content;
+      cursor:pointer;
+      color:rgba(255,255,255,.95);
+      border:0;
+      background:linear-gradient(135deg, rgba(96,165,250,.95), rgba(168,85,247,.85));
+      box-shadow:0 12px 28px rgba(96,165,250,.18);
+      transition:transform .08s ease, filter .12s ease;
+      padding:11px 14px;
+      font-weight:600;
     }
-    button:hover{ filter: brightness(1.05); }
-    button:active{ transform: translateY(1px); }
+    button:hover{ filter:brightness(1.05); }
+    button:active{ transform:translateY(1px); }
     button:disabled{ opacity:.6; cursor:not-allowed; }
-
     button.secondary{
-      background: rgba(255,255,255,.08);
-      color: rgba(255,255,255,.88);
-      border: 1px solid var(--border);
-      box-shadow: none;
+      background:rgba(255,255,255,.08);
+      color:rgba(255,255,255,.88);
+      border:1px solid var(--border);
+      box-shadow:none;
     }
 
     .pill{
-      display:inline-flex; align-items:center; gap: 8px;
-      padding: 7px 10px; border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.86);
-      font-size: 14px;
+      display:inline-flex; align-items:center; gap:8px;
+      padding:7px 10px; border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.06);
+      color:rgba(255,255,255,.86);
+      font-size:14px;
     }
-
-    .muted{ color: var(--muted); }
-    .danger{ color: #ff7b7b; }
-
     .card{
-      border: 1px solid var(--border);
-      border-radius: var(--radius2);
-      padding: 14px;
-      background: rgba(255,255,255,.06);
-      box-shadow: var(--shadow2);
+      border:1px solid var(--border);
+      border-radius:var(--radius2);
+      padding:14px;
+      background:rgba(255,255,255,.06);
+      box-shadow:var(--shadow2);
     }
+
+    .muted{ color:var(--muted); }
+    .danger{ color:var(--danger); }
+    .hidden{ display:none !important; }
   </style>
 </head>
 
 <body>
   <main class="grid">
-    <div id="authBox" class="box grid">
-  <h2>Login</h2>
-  <div class="two">
-    <label class="grid">
-      <span>Email</span>
-      <input id="emailInput" type="email" placeholder="freunde@login.ch" />
-    </label>
-    <label class="grid">
-      <span>Passwort</span>
-      <input id="pwInput" type="password" placeholder="••••••••" />
-    </label>
-  </div>
-  <div class="row">
-    <button id="loginBtn">Einloggen</button>
-    <button id="logoutBtn" class="secondary" style="display:none;">Logout</button>
-    <span id="authStatus" class="muted"></span>
-  </div>
-</div>
-
-<div id="app" class="grid" style="display:none;">
-  <!-- HIER kommt dein bisheriger Inhalt rein -->
-</div>
-
     <header>
       <h1>Jahresplanung</h1>
-      <div class="sub">Live-Liste für Teilnehmer & Termine. Link teilen und gemeinsam planen.</div>
-      <div class="topbar">
-        <div class="badge"><span class="dot"></span> Live · gemeinsame Jahresplanung</div>
+      <div class="sub">Nur mit Login. Danach könnt ihr Teilnehmer und Termine live verwalten.</div>
+      <div class="row" style="padding-top:10px;">
+        <div class="badge"><span class="dot"></span> Live · Supabase</div>
+        <button id="logoutBtn" class="secondary hidden">Logout</button>
+        <span id="whoami" class="muted"></span>
       </div>
     </header>
 
-    <div class="box grid">
-      <h2>Wer macht mit?</h2>
-      <div class="row">
-        <input id="nameInput" placeholder="Dein Name" style="flex:1; min-width:220px;" />
-        <button id="joinBtn">Ich mache mit</button>
-      </div>
-      <div id="participants" class="row"></div>
-      <div id="pStatus" class="muted"></div>
-    </div>
-
-    <div class="box grid">
-      <h2>Termin hinzufügen</h2>
-
+    <!-- LOGIN (sichtbar, bis eingeloggt) -->
+    <section id="loginSection" class="box grid">
+      <h2>Login</h2>
       <div class="two">
         <label class="grid">
-          <span>Datum</span>
-          <input id="dateInput" type="date" />
+          <span>Email</span>
+          <input id="emailInput" type="email" placeholder="deinname@mail.com" autocomplete="username" />
         </label>
         <label class="grid">
-          <span>Typ</span>
-          <select id="typeInput">
-            <option value="day">Tag</option>
-            <option value="weekend">Wochenende</option>
-          </select>
+          <span>Passwort</span>
+          <input id="pwInput" type="password" placeholder="••••••••" autocomplete="current-password" />
         </label>
       </div>
-
-      <label class="grid">
-        <span>Titel (optional)</span>
-        <input id="titleInput" placeholder="z.B. Brunch / Wandern / Städtetrip" />
-      </label>
-
-      <div class="two">
-        <label class="grid">
-          <span>Planer A (optional)</span>
-          <input id="plannerAInput" placeholder="Name" />
-        </label>
-        <label class="grid">
-          <span>Planer B (optional)</span>
-          <input id="plannerBInput" placeholder="Name" />
-        </label>
-      </div>
-
-      <label class="grid">
-        <span>Notiz (optional)</span>
-        <textarea id="notesInput" placeholder="Budget, Ideen, Treffpunkt..." style="min-height:80px;"></textarea>
-      </label>
-
       <div class="row">
-        <button id="addEventBtn">Termin speichern</button>
-        <span id="eStatus" class="muted"></span>
+        <button id="loginBtn">Einloggen</button>
+        <span id="authStatus" class="muted"></span>
       </div>
-    </div>
+      <div class="muted" style="font-size:13px;">
+        Tipp: Wenn du ein „Gruppen-Login“ willst, leg in Supabase einfach genau einen User an und teilt Email+Passwort.
+      </div>
+    </section>
 
-    <div class="box grid">
-      <h2>Aktuelle Termine</h2>
-      <div id="events" class="grid"></div>
-      <div id="eventsEmpty" class="muted"></div>
-    </div>
+    <!-- APP (unsichtbar, bis eingeloggt) -->
+    <section id="appSection" class="grid hidden">
+      <div class="box grid">
+        <h2>Wer macht mit?</h2>
+        <div class="row">
+          <input id="nameInput" placeholder="Dein Name" style="flex:1; min-width:220px;" />
+          <button id="joinBtn">Ich mache mit</button>
+        </div>
+        <div id="participants" class="row"></div>
+        <div id="pStatus" class="muted"></div>
+      </div>
+
+      <div class="box grid">
+        <h2>Termin hinzufügen</h2>
+        <div class="two">
+          <label class="grid">
+            <span>Datum</span>
+            <input id="dateInput" type="date" />
+          </label>
+          <label class="grid">
+            <span>Typ</span>
+            <select id="typeInput">
+              <option value="day">Tag</option>
+              <option value="weekend">Wochenende</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="grid">
+          <span>Titel (optional)</span>
+          <input id="titleInput" placeholder="z.B. Brunch / Wandern / Städtetrip" />
+        </label>
+
+        <div class="two">
+          <label class="grid">
+            <span>Planer A (optional)</span>
+            <input id="plannerAInput" placeholder="Name" />
+          </label>
+          <label class="grid">
+            <span>Planer B (optional)</span>
+            <input id="plannerBInput" placeholder="Name" />
+          </label>
+        </div>
+
+        <label class="grid">
+          <span>Notiz (optional)</span>
+          <textarea id="notesInput" placeholder="Budget, Ideen, Treffpunkt..." style="min-height:80px;"></textarea>
+        </label>
+
+        <div class="row">
+          <button id="addEventBtn">Termin speichern</button>
+          <span id="eStatus" class="muted"></span>
+        </div>
+      </div>
+
+      <div class="box grid">
+        <h2>Aktuelle Termine</h2>
+        <div id="events" class="grid"></div>
+        <div id="eventsEmpty" class="muted"></div>
+      </div>
+    </section>
   </main>
 
   <script type="module">
-    // HIER EINTRAGEN:
+    // 1) HIER EINTRAGEN:
     const SUPABASE_URL = "https://upmqtqspisdlgsnkpaam.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwbXF0cXNwaXNkbGdzbmtwYWFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMDk3NjIsImV4cCI6MjA4MTU4NTc2Mn0.FwGThG6nyM8K8GhcCmtWhoYbqqXJGkBoc8rOHG-6k00";
 
-const AUTH_URL = `${SUPABASE_URL}/auth/v1`;
+    const AUTH_URL = `${SUPABASE_URL}/auth/v1`;
 
-let session = null;
+    // Session speichern (damit man nach Reload eingeloggt bleibt)
+    const LS_KEY = "sb_session_v1";
+    let session = null;
 
-function saveSession(s) {
-  session = s;
-  localStorage.setItem("sb_session", JSON.stringify(s));
-}
-
-function loadSession() {
-  try {
-    const raw = localStorage.getItem("sb_session");
-    if (raw) session = JSON.parse(raw);
-  } catch {}
-}
-
-async function refreshIfNeeded() {
-  if (!session?.access_token || !session?.expires_at || !session?.refresh_token) return;
-  const now = Math.floor(Date.now() / 1000);
-  if (session.expires_at - now > 60) return;
-
-  const r = await fetch(`${AUTH_URL}/token?grant_type=refresh_token`, {
-    method: "POST",
-    headers: {
-      "apikey": SUPABASE_ANON_KEY,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ refresh_token: session.refresh_token }),
-  });
-  if (!r.ok) throw new Error(await r.text());
-  const data = await r.json();
-  saveSession({
-    access_token: data.access_token,
-    refresh_token: data.refresh_token,
-    expires_at: now + data.expires_in,
-    token_type: data.token_type,
-  });
-}
-
-const headers = () => ({
-  "apikey": SUPABASE_ANON_KEY,
-  "Authorization": "Bearer " + (session?.access_token || SUPABASE_ANON_KEY),
-  "Content-Type": "application/json",
-});
-
-
-    function qs(obj) {
-      const s = new URLSearchParams();
-      for (const [k,v] of Object.entries(obj)) s.set(k, v);
-      return s.toString();
+    function saveSession(s) {
+      session = s;
+      localStorage.setItem(LS_KEY, JSON.stringify(s));
+    }
+    function loadSession() {
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (raw) session = JSON.parse(raw);
+      } catch {}
+    }
+    function clearSession() {
+      session = null;
+      localStorage.removeItem(LS_KEY);
     }
 
-    async function sbSelect(table, queryObj) {
-      const url = `${SUPABASE_URL}/rest/v1/${table}?${qs(queryObj)}`;
-      const r = await fetch(url, { headers: headers() });
-      if (!r.ok) throw new Error(await r.text());
-      return r.json();
+    function escapeHtml(s) {
+      return (s ?? "").toString().replace(/[&<>"']/g, c => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[c]));
     }
 
-    async function sbInsert(table, rows) {
-      const url = `${SUPABASE_URL}/rest/v1/${table}`;
-      const r = await fetch(url, { method:"POST", headers: headers(), body: JSON.stringify(rows) });
-      if (!r.ok) throw new Error(await r.text());
-      return true;
-    }
-
-    async function sbDelete(table, filter) {
-      const url = `${SUPABASE_URL}/rest/v1/${table}?${qs(filter)}`;
-      const r = await fetch(url, { method:"DELETE", headers: headers() });
-      if (!r.ok) throw new Error(await r.text());
-      return true;
-    }
+    // UI refs
+    const loginSection = document.getElementById("loginSection");
+    const appSection = document.getElementById("appSection");
+    const emailInput = document.getElementById("emailInput");
+    const pwInput = document.getElementById("pwInput");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const authStatus = document.getElementById("authStatus");
+    const whoami = document.getElementById("whoami");
 
     const participantsEl = document.getElementById("participants");
     const pStatusEl = document.getElementById("pStatus");
@@ -335,83 +290,173 @@ const headers = () => ({
     const notesInput = document.getElementById("notesInput");
     const addEventBtn = document.getElementById("addEventBtn");
 
-    function escapeHtml(s) {
-      return (s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    function setAuthed(isAuthed, email = "") {
+      loginSection.classList.toggle("hidden", isAuthed);
+      appSection.classList.toggle("hidden", !isAuthed);
+      logoutBtn.classList.toggle("hidden", !isAuthed);
+      whoami.textContent = isAuthed && email ? `Eingeloggt als: ${email}` : "";
+      authStatus.textContent = isAuthed ? "" : "Bitte einloggen";
+    }
+
+    async function signInWithPassword(email, password) {
+      const r = await fetch(`${AUTH_URL}/token?grant_type=password`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const txt = await r.text();
+      if (!r.ok) throw new Error(txt);
+
+      const data = JSON.parse(txt);
+      const now = Math.floor(Date.now() / 1000);
+
+      saveSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        expires_at: now + data.expires_in,
+        token_type: data.token_type,
+      });
+
+      return data;
+    }
+
+    async function fetchUserEmail() {
+      if (!session?.access_token) return "";
+      const r = await fetch(`${AUTH_URL}/user`, {
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": "Bearer " + session.access_token,
+        }
+      });
+      if (!r.ok) return "";
+      const u = await r.json();
+      return u?.email || "";
+    }
+
+    async function refreshIfNeeded() {
+      if (!session?.access_token || !session?.refresh_token || !session?.expires_at) return;
+
+      const now = Math.floor(Date.now() / 1000);
+      if (session.expires_at - now > 60) return;
+
+      const r = await fetch(`${AUTH_URL}/token?grant_type=refresh_token`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh_token: session.refresh_token }),
+      });
+
+      const txt = await r.text();
+      if (!r.ok) throw new Error(txt);
+
+      const data = JSON.parse(txt);
+      saveSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        expires_at: now + data.expires_in,
+        token_type: data.token_type,
+      });
+    }
+
+    // Supabase REST headers: immer User-Token benutzen (RLS)
+    const headers = () => ({
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": "Bearer " + (session?.access_token || ""),
+      "Content-Type": "application/json",
+    });
+
+    function qs(obj) {
+      const s = new URLSearchParams();
+      for (const [k, v] of Object.entries(obj)) s.set(k, v);
+      return s.toString();
+    }
+
+    async function sbSelect(table, queryObj) {
+      const url = `${SUPABASE_URL}/rest/v1/${table}?${qs(queryObj)}`;
+      const r = await fetch(url, { headers: headers() });
+      const txt = await r.text();
+      if (!r.ok) throw new Error(txt);
+      return JSON.parse(txt);
+    }
+
+    async function sbInsert(table, rows) {
+      const url = `${SUPABASE_URL}/rest/v1/${table}`;
+      const r = await fetch(url, { method: "POST", headers: headers(), body: JSON.stringify(rows) });
+      const txt = await r.text();
+      if (!r.ok) throw new Error(txt);
+      return true;
+    }
+
+    async function sbDelete(table, filter) {
+      const url = `${SUPABASE_URL}/rest/v1/${table}?${qs(filter)}`;
+      const r = await fetch(url, { method: "DELETE", headers: headers() });
+      const txt = await r.text();
+      if (!r.ok) throw new Error(txt);
+      return true;
     }
 
     async function loadParticipants() {
-     // --- Auth UI wiring ---
-const authBox = document.getElementById("authBox");
-const app = document.getElementById("app");
-const emailInput = document.getElementById("emailInput");
-const pwInput = document.getElementById("pwInput");
-const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const authStatus = document.getElementById("authStatus");
+      pStatusEl.textContent = "Lade…";
+      try {
+        const rows = await sbSelect("participants", { select: "*", order: "created_at.asc" });
+        participantsEl.innerHTML = rows.map(r => `<span class="pill">${escapeHtml(r.name)}</span>`).join("");
+        pStatusEl.textContent = rows.length ? "" : "Noch niemand eingetragen.";
+      } catch (e) {
+        pStatusEl.innerHTML = `<span class="danger">Fehler: ${escapeHtml(e.message)}</span>`;
+      }
+    }
 
-function setAuthed(isAuthed) {
-  app.style.display = isAuthed ? "grid" : "none";
-  logoutBtn.style.display = isAuthed ? "inline-flex" : "none";
-  loginBtn.style.display = isAuthed ? "none" : "inline-flex";
-  authStatus.textContent = isAuthed ? "Eingeloggt" : "Bitte einloggen";
-}
+    async function loadEvents() {
+      eventsEmptyEl.textContent = "Lade…";
+      try {
+        const rows = await sbSelect("events", { select: "*", order: "date.asc" });
+        if (!rows.length) {
+          eventsEl.innerHTML = "";
+          eventsEmptyEl.textContent = "Noch keine Termine eingetragen.";
+          return;
+        }
+        eventsEmptyEl.textContent = "";
+        eventsEl.innerHTML = rows.map(ev => `
+          <div class="card">
+            <div class="row" style="justify-content:space-between;">
+              <div>
+                <div><b>${escapeHtml(ev.date)}</b> • ${ev.type === "weekend" ? "Wochenende" : "Tag"}</div>
+                <div class="muted">${ev.title ? escapeHtml(ev.title) : "ohne Titel"}</div>
+                <div class="muted" style="margin-top:6px;">
+                  ${ev.planner_a || ev.planner_b ? `Planer: ${escapeHtml(ev.planner_a ?? "?")} & ${escapeHtml(ev.planner_b ?? "?")}` : "Planer noch offen"}
+                </div>
+                ${ev.notes ? `<div class="muted" style="margin-top:6px;">${escapeHtml(ev.notes)}</div>` : ""}
+              </div>
+              <button class="secondary" data-del="${escapeHtml(ev.id)}">Löschen</button>
+            </div>
+          </div>
+        `).join("");
 
-async function signIn(email, password) {
-  const r = await fetch(`${AUTH_URL}/token?grant_type=password`, {
-    method: "POST",
-    headers: { "apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-  if (!r.ok) throw new Error(await r.text());
-  const data = await r.json();
-  const now = Math.floor(Date.now() / 1000);
-  saveSession({
-    access_token: data.access_token,
-    refresh_token: data.refresh_token,
-    expires_at: now + data.expires_in,
-    token_type: data.token_type,
-  });
-}
-
-function signOut() {
-  session = null;
-  localStorage.removeItem("sb_session");
-}
-
-loginBtn.addEventListener("click", async () => {
-  try {
-    authStatus.textContent = "Login…";
-    await signIn(emailInput.value.trim(), pwInput.value);
-    setAuthed(true);
-    await loadParticipants();
-    await loadEvents();
-  } catch (e) {
-    authStatus.textContent = "Login fehlgeschlagen";
-    alert(e.message);
-  }
-});
-
-logoutBtn.addEventListener("click", () => {
-  signOut();
-  setAuthed(false);
-});
-
-// Init
-loadSession();
-setAuthed(!!session?.access_token);
-
-(async () => {
-  if (!session?.access_token) return;
-  await refreshIfNeeded();
-  await loadParticipants();
-  await loadEvents();
-})();
-
+        eventsEl.querySelectorAll("button[data-del]").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-del");
+            if (!id) return;
+            if (!confirm("Diesen Termin wirklich löschen?")) return;
+            try {
+              await sbDelete("events", { id: "eq." + id });
+              await loadEvents();
+            } catch (e) {
+              alert(e.message);
+            }
+          });
+        });
       } catch (e) {
         eventsEmptyEl.innerHTML = `<span class="danger">Fehler: ${escapeHtml(e.message)}</span>`;
       }
     }
 
+    // Actions (nur wenn eingeloggt)
     joinBtn.addEventListener("click", async () => {
       const n = nameInput.value.trim();
       if (!n) return;
@@ -457,7 +502,58 @@ setAuthed(!!session?.access_token);
       }
     });
 
+    // Login handlers
+    loginBtn.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const pw = pwInput.value;
+      if (!email || !pw) return;
 
+      loginBtn.disabled = true;
+      authStatus.textContent = "Login…";
+
+      try {
+        await signInWithPassword(email, pw);
+        await refreshIfNeeded();
+        const e = await fetchUserEmail();
+        setAuthed(true, e || email);
+        authStatus.textContent = "";
+
+        await loadParticipants();
+        await loadEvents();
+      } catch (err) {
+        authStatus.textContent = "Login fehlgeschlagen";
+        alert(err.message);
+        clearSession();
+        setAuthed(false);
+      } finally {
+        loginBtn.disabled = false;
+      }
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      clearSession();
+      setAuthed(false);
+    });
+
+    // Init on page load
+    (async () => {
+      loadSession();
+      if (!session?.access_token) {
+        setAuthed(false);
+        return;
+      }
+
+      try {
+        await refreshIfNeeded();
+        const e = await fetchUserEmail();
+        setAuthed(true, e);
+        await loadParticipants();
+        await loadEvents();
+      } catch {
+        clearSession();
+        setAuthed(false);
+      }
+    })();
   </script>
 </body>
 </html>
